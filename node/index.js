@@ -1,5 +1,10 @@
-const argv = require('yargs')
-  .demandCommand(1, 'You must provide an adhoc name. Ex: "npm start file-name"')
+const path = require('path')
+const yargs = require('yargs')
+
+const argv = yargs
+  .demandCommand(1, 'You must provide an adhoc name. Ex: "npm start path/to/file"')
   .argv
 
-require(`./src/${argv._[0]}`)
+const commandPath = path.resolve('.', 'src', argv._[0])
+
+require(commandPath)

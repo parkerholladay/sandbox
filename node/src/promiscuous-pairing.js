@@ -1,5 +1,3 @@
-'use strict'
-
 const keys = [
   1,
   2,
