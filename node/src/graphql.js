@@ -1,6 +1,7 @@
-const { graphql, buildSchema } = require('graphql')
+const { graphql, buildASTSchema, buildSchema } = require('graphql')
+const gql = require('graphql-tag')
 
-const schema = buildSchema(`
+const schema = buildASTSchema(gql`
   type Query {
     hello: String
     herp: Herp
@@ -19,6 +20,6 @@ const root = {
   })
 }
 
-graphql(schema, '{ hello, herp { derp } }', root).then((response) => {
-  console.log("response.data:", response.data)
+graphql({ rootValue: root, schema, source: '{ hello, herp { derp } }' }).then((response) => {
+  console.log('response.data:', response.data)
 })
