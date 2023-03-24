@@ -4,7 +4,7 @@ const { v4: uuid } = require('uuid')
 
 const { addEdge, getEdgePopularity, seedGraph } = require('../skillnet')
 
-describe.only('skillnet', () => {
+describe('skillnet', () => {
   let nodeIds
 
   beforeEach(() => {
