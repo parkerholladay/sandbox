@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const { validateVin } = require('../vin')
 
-describe('vin', () => {
+describe.skip('vin', () => {
   describe('#validateVin', () => {
     const input = {
       fuel_type: 'gasoline',

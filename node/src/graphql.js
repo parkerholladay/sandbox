@@ -2,12 +2,14 @@ const { graphql, buildASTSchema, buildSchema } = require('graphql')
 const gql = require('graphql-tag')
 
 const schema = buildASTSchema(gql`
+  extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
+
   type Query {
     hello: String
     herp: Herp
   }
-  type Herp {
-    derp: String,
+  type Herp @key(fields: "derp") {
+    derp: String
     lerp: String
   }
 `)
