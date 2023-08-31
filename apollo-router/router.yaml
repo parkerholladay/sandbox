@@ -1,0 +1,24 @@
+cors:
+  allow_any_origin: true
+
+headers:
+  all:
+    request:
+      - propagate:
+          named: Authorization
+      - propagate:
+          named: apollographql-client-name
+
+homepage:
+  enabled: false
+
+include_subgraph_errors:
+  all: true
+
+sandbox:
+  enabled: true
+
+supergraph:
+  introspection: true
+  listen: 0.0.0.0:4000
+  path: /graphql
