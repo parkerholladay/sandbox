@@ -19,5 +19,8 @@
     "uuid": "9.0.0",
     "yargs": "17.7.1"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "odbc": "^2.4.8"
+  }
 }
