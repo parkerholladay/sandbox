@@ -7,13 +7,16 @@ headers:
       - propagate:
           named: Authorization
       - propagate:
-          named: apollographql-client-name
+          matching: apollographql-client-*
 
 homepage:
   enabled: false
 
 include_subgraph_errors:
   all: true
+
+rhai:
+  scripts: ./rhai
 
 sandbox:
   enabled: true
