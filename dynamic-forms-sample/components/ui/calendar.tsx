@@ -1,7 +1,9 @@
 'use client'
 
-import * as React from 'react'
+import { CaretLeftIcon, CaretRightIcon, CaretDownIcon } from '@phosphor-icons/react'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from 'cn'
+import { type ComponentProps, useEffect, useRef } from 'react'
 import {
   DayPicker,
   getDefaultClassNames,
@@ -9,8 +11,9 @@ import {
   type Locale,
 } from 'react-day-picker'
 
-import { Button, buttonVariants } from '@/components/ui/button'
-import { CaretLeftIcon, CaretRightIcon, CaretDownIcon } from '@phosphor-icons/react'
+type CalendarProps = ComponentProps<typeof DayPicker> & {
+  buttonVariant?: ComponentProps<typeof Button>['variant']
+}
 
 function Calendar({
   className,
@@ -22,9 +25,7 @@ function Calendar({
   formatters,
   components,
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>['variant']
-}) {
+}: CalendarProps) {
   const defaultClassNames = getDefaultClassNames()
 
   return (
@@ -180,17 +181,21 @@ function Calendar({
   )
 }
 
+type CalendarDayButtonProps = ComponentProps<typeof DayButton> & {
+  locale?: Partial<Locale>
+}
+
 function CalendarDayButton({
   className,
   day,
   modifiers,
   locale,
   ...props
-}: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }) {
+}: CalendarDayButtonProps) {
   const defaultClassNames = getDefaultClassNames()
 
-  const ref = React.useRef<HTMLButtonElement>(null)
-  React.useEffect(() => {
+  const ref = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
     if (modifiers.focused) ref.current?.focus()
   }, [modifiers.focused])
 
