@@ -8,63 +8,92 @@ export type JsonValue =
 
 export type ConditionValue = string | number | boolean;
 
-export interface FieldCondition {
+export type FieldCondition = {
   field: string;
   equals: ConditionValue;
 }
 
-interface BaseField {
+type BaseField = {
   name: string;
   label: string;
   description?: string;
   visibleWhen?: FieldCondition;
 }
 
-export interface TextField extends BaseField {
-  type: 'text' | 'textarea' | 'email' | 'phone';
+type TextFieldProperties = {
   placeholder?: string;
   defaultValue?: string;
   required?: boolean;
 }
 
-export interface NumberField extends BaseField {
+export type TextField = BaseField & TextFieldProperties & {
+  type: 'text';
+}
+
+export type TextareaField = BaseField & TextFieldProperties & {
+  type: 'textarea';
+}
+
+export type EmailField = BaseField & TextFieldProperties & {
+  type: 'email';
+}
+
+export type PhoneField = BaseField & TextFieldProperties & {
+  type: 'phone';
+}
+
+export type NumberField = BaseField & {
   type: 'number';
   defaultValue?: number;
   required?: boolean;
 }
 
-export interface DateField extends BaseField {
+export type DateField = BaseField & {
   type: 'date';
   defaultValue?: string;
   required?: boolean;
 }
 
-export interface ChoiceField extends BaseField {
-  type: 'select' | 'radio';
+type ChoiceFieldProperties = {
   options: readonly ChoiceOption[];
   defaultValue?: string;
   required?: boolean;
 }
 
-export interface MultiSelectField extends BaseField {
+export type SelectField = BaseField & ChoiceFieldProperties & {
+  type: 'select';
+}
+
+export type RadioField = BaseField & ChoiceFieldProperties & {
+  type: 'radio';
+}
+
+export type MultiSelectField = BaseField & {
   type: 'multi-select';
   options: readonly ChoiceOption[];
   defaultValue?: string[];
   required?: boolean;
 }
 
-export interface BooleanField extends BaseField {
-  type: 'checkbox' | 'switch';
+type BooleanFieldProperties = {
   defaultValue?: boolean;
   required?: boolean;
 }
 
-export interface GroupField extends BaseField {
+export type CheckboxField = BaseField & BooleanFieldProperties & {
+  type: 'checkbox';
+}
+
+export type SwitchField = BaseField & BooleanFieldProperties & {
+  type: 'switch';
+}
+
+export type GroupField = BaseField & {
   type: 'group';
   fields: readonly FormField[];
 }
 
-export interface RepeaterField extends BaseField {
+export type RepeaterField = BaseField & {
   type: 'repeater';
   fields: readonly FormField[];
   minItems?: number;
@@ -73,20 +102,28 @@ export interface RepeaterField extends BaseField {
 
 export type FormField =
   | TextField
+  | TextareaField
+  | EmailField
+  | PhoneField
   | NumberField
   | DateField
-  | ChoiceField
+  | SelectField
+  | RadioField
   | MultiSelectField
-  | BooleanField
+  | CheckboxField
+  | SwitchField
   | GroupField
   | RepeaterField;
 
-export interface ChoiceOption {
+export type CompositeField = GroupField | RepeaterField;
+export type ScalarField = Exclude<FormField, CompositeField>;
+
+export type ChoiceOption = {
   label: string;
   value: string;
 }
 
-export interface FormDefinition {
+export type FormDefinition = {
   type: string;
   title: string;
   description?: string;

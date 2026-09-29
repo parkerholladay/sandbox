@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { FORM_SUBMISSION_SCHEMAS } from './schemas'
 import { FORM_DEFINITION_SEEDS } from './seed'
+import { GRADE_LEVELS } from './grade-options'
 import type { FieldCondition, FormField } from './types'
 
 function expectUniqueNamesAndValidConditions(fields: readonly FormField[]) {
@@ -43,6 +44,20 @@ describe('#FORM_DEFINITION_SEEDS', () => {
       expect(Object.hasOwn(FORM_SUBMISSION_SCHEMAS, form.type)).toBe(true)
       expectUniqueNamesAndValidConditions(form.fields)
       expect(JSON.parse(JSON.stringify(form))).toEqual(form)
+    }
+  })
+
+  it('uses the shared Kindergarten through 12th grade select in every form', () => {
+    for (const form of FORM_DEFINITION_SEEDS) {
+      const student = form.fields.find((field) => field.name === 'student')
+      const grade = student?.type === 'group'
+        ? student.fields.find((field) => field.name === 'grade')
+        : undefined
+
+      expect(grade?.type).toBe('select')
+      if (grade?.type === 'select') {
+        expect(grade.options).toEqual(GRADE_LEVELS)
+      }
     }
   })
 })

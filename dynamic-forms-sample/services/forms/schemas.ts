@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { GRADE_VALUES } from './grade-options'
 
 const requiredText = z.string().trim().min(1, 'This field is required.')
 const email = z.email('Enter a valid email address.')
@@ -6,7 +7,7 @@ const date = z.iso.date('Enter a valid date.')
 
 const studentSchema = z.strictObject({
   name: requiredText,
-  grade: requiredText,
+  grade: z.enum(GRADE_VALUES),
 })
 
 const guardianWithEmailSchema = z.strictObject({

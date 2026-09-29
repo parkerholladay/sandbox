@@ -48,6 +48,18 @@ describe('#validateFormSubmission', () => {
       endDate: '2026-09-29',
     })
     expect(issuePaths(reversedDates)).toContainEqual(['endDate'])
+
+    const kindergarten = validateFormSubmission(absence, {
+      ...submission,
+      student: { ...submission.student, grade: 'K' },
+    })
+    expect(kindergarten.success).toBe(true)
+
+    const unsupportedGrade = validateFormSubmission(absence, {
+      ...submission,
+      student: { ...submission.student, grade: 'Pre-K' },
+    })
+    expect(issuePaths(unsupportedGrade)).toContainEqual(['student', 'grade'])
   })
 
   it('allows either permission choice and validates conditional medical details and acknowledgment', () => {

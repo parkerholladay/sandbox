@@ -1,4 +1,5 @@
 import type { ChoiceOption, FormDefinition } from './types'
+import { GRADE_LEVELS } from './grade-options'
 
 const absenceReasons = [
   { label: 'Illness', value: 'illness' },
@@ -29,7 +30,7 @@ export const FORM_DEFINITION_SEEDS = [
         type: 'group',
         fields: [
           { name: 'name', label: 'Student name', type: 'text', required: true },
-          { name: 'grade', label: 'Grade', type: 'text', required: true },
+          { name: 'grade', label: 'Grade', type: 'select', options: GRADE_LEVELS, required: true },
         ],
       },
       {
@@ -64,7 +65,7 @@ export const FORM_DEFINITION_SEEDS = [
         type: 'group',
         fields: [
           { name: 'name', label: 'Student name', type: 'text', required: true },
-          { name: 'grade', label: 'Grade', type: 'text', required: true },
+          { name: 'grade', label: 'Grade', type: 'select', options: GRADE_LEVELS, required: true },
         ],
       },
       {
@@ -101,7 +102,7 @@ export const FORM_DEFINITION_SEEDS = [
         type: 'group',
         fields: [
           { name: 'name', label: 'Student name', type: 'text', required: true },
-          { name: 'grade', label: 'Grade', type: 'text', required: true },
+          { name: 'grade', label: 'Grade', type: 'select', options: GRADE_LEVELS, required: true },
         ],
       },
       {
