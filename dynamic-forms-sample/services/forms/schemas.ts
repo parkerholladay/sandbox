@@ -82,6 +82,14 @@ export const FORM_SUBMISSION_SCHEMAS = {
 
 export type FormType = keyof typeof FORM_SUBMISSION_SCHEMAS;
 
+export function getFormSubmissionSchema(type: string) {
+  if (!Object.hasOwn(FORM_SUBMISSION_SCHEMAS, type)) {
+    throw new Error(`No submission schema is registered for form type "${type}".`)
+  }
+
+  return FORM_SUBMISSION_SCHEMAS[type as FormType]
+}
+
 export type FormSubmissionByType = {
-  [Type in FormType]: z.infer<(typeof FORM_SUBMISSION_SCHEMAS)[Type]>;
-};
+  [Type in FormType]: z.infer<(typeof FORM_SUBMISSION_SCHEMAS)[Type]>
+}

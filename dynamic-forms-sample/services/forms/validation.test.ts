@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 import { FORM_DEFINITION_SEEDS } from './seed'
 import type { FormDefinition } from './types'
-import { validateFormSubmission } from './validation'
+import { getFormSchema, validateFormSubmission } from './validation'
 
 const absence = FORM_DEFINITION_SEEDS.find((form) => form.type === 'absence-report')!
 const permission = FORM_DEFINITION_SEEDS.find((form) => form.type === 'field-trip-permission')!
@@ -124,5 +125,61 @@ describe('#validateFormSubmission', () => {
     const definition: FormDefinition = { type: 'unregistered', title: 'Example', fields: [] }
 
     expect(() => validateFormSubmission(definition, {})).toThrow(/No submission schema/)
+  })
+})
+
+describe('#getFormSchema', () => {
+  it('works with zodResolver and preserves parsed values and nested error paths', async () => {
+    const resolver = zodResolver(getFormSchema(absence))
+    const input = {
+      student: { name: ' Jamie Rivera ', grade: '4' },
+      guardian: { name: 'Alex Rivera', email: 'alex@example.test' },
+      startDate: '2026-09-28',
+      endDate: '2026-09-29',
+      reason: 'illness',
+      reasonDetails: 'Stale hidden value',
+    }
+    const parsed = await resolver(input, undefined, {
+      fields: {},
+      shouldUseNativeValidation: false,
+    })
+
+    expect(parsed.errors).toEqual({})
+    expect(parsed.values.student.name).toBe('Jamie Rivera')
+    expect(parsed.values).not.toHaveProperty('reasonDetails')
+    const serverParsed = validateFormSubmission(absence, input)
+    expect(serverParsed.success).toBe(true)
+    if (serverParsed.success) {
+      expect(parsed.values).toEqual(serverParsed.data)
+    }
+
+    const invalid = await resolver(
+      { ...input, startDate: '2026-09-30', endDate: '2026-09-29' },
+      undefined,
+      { fields: {}, shouldUseNativeValidation: false },
+    )
+
+    expect(invalid.errors.endDate?.message).toBe(
+      'The last day absent must be the same as or after the first day.',
+    )
+
+    const contactsResolver = zodResolver(getFormSchema(contacts))
+    const invalidRepeaterEntry = await contactsResolver(
+      {
+        student: { name: 'Jordan Lee', grade: '3' },
+        contacts: [
+          {
+            name: 'Avery Lee',
+            relationship: 'Aunt',
+            phone: '555-0102',
+            preferredMethod: 'email',
+          },
+        ],
+      },
+      undefined,
+      { fields: {}, shouldUseNativeValidation: false },
+    )
+
+    expect(invalidRepeaterEntry.errors).toHaveProperty('contacts.0.email.message')
   })
 })

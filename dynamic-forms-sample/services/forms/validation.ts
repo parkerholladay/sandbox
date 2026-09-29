@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { FORM_SUBMISSION_SCHEMAS } from './schemas'
+import { getFormSubmissionSchema } from './schemas'
 import type { FieldCondition, FormDefinition, FormField } from './types'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -43,14 +43,10 @@ function pruneInactiveFields(
 }
 
 export function getFormSchema(definition: FormDefinition) {
-  const schema = FORM_SUBMISSION_SCHEMAS[definition.type as keyof typeof FORM_SUBMISSION_SCHEMAS]
-
-  if (!schema) {
-    throw new Error(`No submission schema is registered for form type "${definition.type}".`)
-  }
+  const schema = getFormSubmissionSchema(definition.type)
 
   return z.preprocess(
-    (values) =>
+    (values: Record<string, unknown>) =>
       isRecord(values) ? pruneInactiveFields(definition.fields, values) : values,
     schema,
   )
