@@ -22,11 +22,21 @@ type DynamicFieldsProps = {
   parentPath?: string
 }
 
-export const DynamicFields = ({ fields, parentPath = '' }: DynamicFieldsProps) => fields.map((field) => {
-  const fieldPath = parentPath ? `${parentPath}.${field.name}` : field.name
+export const DynamicFields = ({ fields, parentPath = '' }: DynamicFieldsProps) => {
+  return fields.map((field) => {
+    const fieldPath = parentPath
+      ? `${parentPath}.${field.name}`
+      : field.name
 
-  return <DynamicField key={fieldPath} field={field} fieldPath={fieldPath} />
-})
+    return (
+      <DynamicField
+        field={field}
+        fieldPath={fieldPath}
+        key={fieldPath}
+      />
+    )
+  })
+}
 
 type DynamicFieldProps = {
   field: FormField
@@ -35,7 +45,13 @@ type DynamicFieldProps = {
 
 const DynamicField = ({ field, fieldPath }: DynamicFieldProps) => {
   if (field.visibleWhen) {
-    return <ConditionalField field={field} fieldPath={fieldPath} condition={field.visibleWhen} />
+    return (
+      <ConditionalField
+        condition={field.visibleWhen}
+        field={field}
+        fieldPath={fieldPath}
+      />
+    )
   }
 
   return <RenderedField field={field} fieldPath={fieldPath} />
@@ -120,18 +136,18 @@ const ScalarField = ({ field, fieldPath }: ScalarFieldProps) => {
       )}
       {field.description && <FieldDescription id={descriptionId}>{field.description}</FieldDescription>}
       <Controller
-        name={fieldPath}
         control={control}
+        name={fieldPath}
         render={({ field: input }) => (
           <ScalarFieldControl
+            describedBy={describedBy}
             field={field}
             id={id}
-            value={input.value}
-            describedBy={describedBy}
+            inputRef={input.ref}
             isInvalid={Boolean(error)}
             onBlur={input.onBlur}
             onChange={input.onChange}
-            inputRef={input.ref}
+            value={input.value}
           />
         )}
       />
@@ -156,16 +172,26 @@ const RepeaterField = ({ field, fieldPath }: RepeaterFieldProps) => {
   return (
     <FieldSet className="rounded border border-border p-4">
       <FieldLegend>{field.label}</FieldLegend>
-      {field.description && <FieldDescription>{field.description}</FieldDescription>}
+      {field.description && (
+        <FieldDescription>{field.description}</FieldDescription>
+      )}
       <div className="flex flex-col gap-5">
         {fields.map((entry, index) => (
           <FieldSet className="rounded bg-muted/40 p-4" key={entry.id}>
             <FieldLegend variant="label">
               {field.label} {index + 1}
             </FieldLegend>
-            <DynamicFields fields={field.fields} parentPath={`${fieldPath}.${index}`} />
+            <DynamicFields
+              fields={field.fields}
+              parentPath={`${fieldPath}.${index}`}
+            />
             {fields.length > minimumItems && (
-              <Button disabled={isDisabled} type="button" variant="outline" onClick={() => remove(index)}>
+              <Button
+                disabled={isDisabled}
+                type="button"
+                onClick={() => remove(index)}
+                variant="outline"
+              >
                 Remove {field.label.toLowerCase()} {index + 1}
               </Button>
             )}
@@ -173,7 +199,12 @@ const RepeaterField = ({ field, fieldPath }: RepeaterFieldProps) => {
         ))}
       </div>
       {canAddItem && (
-        <Button disabled={isDisabled} type="button" variant="outline" onClick={() => append(getDefinitionDefaults({ fields: field.fields }))}>
+        <Button
+          disabled={isDisabled}
+          type="button"
+          onClick={() => append(getDefinitionDefaults({ fields: field.fields }))}
+          variant="outline"
+        >
           Add {field.label.toLowerCase()}
         </Button>
       )}

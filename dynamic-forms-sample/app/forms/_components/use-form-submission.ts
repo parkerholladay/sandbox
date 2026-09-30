@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type SubmitEvent } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 import type { FormDefinition, SubmissionReceipt, SubmitFormAction  } from '@/services/universal/form/types'
 import type { FormValues } from './dynamic-field'
@@ -9,17 +9,15 @@ import { getDefinitionDefaults, getVisibleFieldPaths } from './utils'
 type UseFormSubmissionOptions = {
   form: UseFormReturn<FormValues>
   isDisabled: boolean
-  onSubmittingChange?: (isSubmitting: boolean) => void
   selectedForm: FormDefinition
-  submitAction: SubmitFormAction
+  onSubmit: SubmitFormAction
 }
 
 export const useFormSubmission = ({
   form,
   isDisabled,
-  onSubmittingChange,
   selectedForm,
-  submitAction,
+  onSubmit,
 }: UseFormSubmissionOptions) => {
   const [receipt, setReceipt] = useState<SubmissionReceipt | null>(null)
   const [isPending, setIsPending] = useState(false)
@@ -29,22 +27,25 @@ export const useFormSubmission = ({
   const { setFocus } = form
 
   useEffect(() => {
-    if (!isPending && errorField) setFocus(errorField)
+    if (!isPending && errorField) {
+      setFocus(errorField)
+    }
   }, [errorField, isPending, setFocus])
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (isDisabled || isSubmittingRef.current || receipt) return
+    if (isDisabled || isSubmittingRef.current || receipt) {
+      return
+    }
 
     isSubmittingRef.current = true
     setIsPending(true)
     setErrorField(null)
-    onSubmittingChange?.(true)
     form.clearErrors('root.server')
 
     try {
       await form.handleSubmit(async (values) => {
-        const result = await submitAction({ type: selectedForm.type, values })
+        const result = await onSubmit({ type: selectedForm.type, values })
 
         if (result.status === 'success') {
           form.reset(getDefinitionDefaults(selectedForm))
@@ -73,6 +74,7 @@ export const useFormSubmission = ({
           if (formMessages.length || !result.issues.length) {
             form.setError('root.server', { type: 'server', message: formMessages.join(' ') || result.message })
           }
+
           return
         }
 
@@ -87,7 +89,6 @@ export const useFormSubmission = ({
     } finally {
       isSubmittingRef.current = false
       setIsPending(false)
-      onSubmittingChange?.(false)
     }
   }
 
@@ -98,5 +99,11 @@ export const useFormSubmission = ({
     setReceipt(null)
   }
 
-  return { handleSubmit, handleSubmitAnother, hasRestarted, isPending, receipt }
+  return {
+    handleSubmit,
+    handleSubmitAnother,
+    hasRestarted,
+    isPending,
+    receipt,
+  }
 }

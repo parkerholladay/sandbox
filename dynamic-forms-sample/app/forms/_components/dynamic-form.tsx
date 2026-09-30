@@ -13,19 +13,17 @@ import { useFormSubmission } from './use-form-submission'
 import { getDefinitionDefaults } from './utils'
 
 type DynamicFormProps = {
-  disabled?: boolean
+  isDisabled?: boolean
   onDirtyChange: (isDirty: boolean) => void
-  onSubmittingChange?: (isSubmitting: boolean) => void
+  onSubmit: SubmitFormAction
   selectedForm: FormDefinition
-  submitAction: SubmitFormAction
 }
 
 export const DynamicForm = ({
-  disabled = false,
+  isDisabled = false,
   onDirtyChange,
-  onSubmittingChange,
+  onSubmit,
   selectedForm,
-  submitAction,
 }: DynamicFormProps) => {
   const schema = getFormSchema(selectedForm)
   const form = useForm<FormValues>({
@@ -36,10 +34,14 @@ export const DynamicForm = ({
     shouldFocusError: true,
     shouldUnregister: false,
   })
-  const { handleSubmit, handleSubmitAnother, hasRestarted, isPending, receipt } = useFormSubmission({
-    form, isDisabled: disabled, onSubmittingChange, selectedForm, submitAction,
-  })
-  const isDisabled = disabled || isPending
+  const {
+    handleSubmit,
+    handleSubmitAnother,
+    hasRestarted,
+    isPending,
+    receipt,
+  } = useFormSubmission({ form, isDisabled, onSubmit, selectedForm })
+  const isSubmitDisabled = isDisabled || isPending
   const serverError = form.formState.errors.root?.server?.message
   const focusElement = useCallback((element: HTMLElement | null) => { element?.focus() }, [])
 
@@ -58,15 +60,29 @@ export const DynamicForm = ({
         >
           Form submitted
         </h2>
-        <p role="status">Your {selectedForm.title.toLowerCase()} has been received.</p>
+        <p role="status">
+          Your {selectedForm.title.toLowerCase()} has been received.
+        </p>
         <dl className="grid gap-2 text-sm">
-          <div><dt className="font-medium">Receipt ID</dt><dd className="break-all">{receipt.id}</dd></div>
+          <div>
+            <dt className="font-medium">Receipt ID</dt>
+            <dd className="break-all">{receipt.id}</dd>
+         </div>
           <div>
             <dt className="font-medium">Submitted</dt>
-            <dd><time dateTime={receipt.submittedAt}>{new Date(receipt.submittedAt).toLocaleString()}</time></dd>
+            <dd>
+              <time dateTime={receipt.submittedAt}>
+                {new Date(receipt.submittedAt).toLocaleString()}
+             </time>
+            </dd>
           </div>
         </dl>
-        <Button className="self-start" disabled={disabled} onClick={handleSubmitAnother} type="button">
+        <Button
+          className="self-start"
+          disabled={isSubmitDisabled}
+          onClick={handleSubmitAnother}
+          type="button"
+        >
           Submit another
         </Button>
       </section>
@@ -75,7 +91,7 @@ export const DynamicForm = ({
 
   return (
     <FormProvider {...form}>
-      <FormDisabledContext value={isDisabled}>
+      <FormDisabledContext value={isSubmitDisabled}>
         <form
           aria-busy={isPending}
           className="flex flex-col gap-8"
@@ -90,22 +106,33 @@ export const DynamicForm = ({
             >
               {selectedForm.title}
             </h2>
-            {selectedForm.description && <p className="text-sm text-muted-foreground">{selectedForm.description}</p>}
+            {selectedForm.description && (
+              <p className="text-sm text-muted-foreground">
+                {selectedForm.description}
+              </p>
+            )}
           </header>
-          <FieldSet className="contents" disabled={isDisabled}>
-            <FieldLegend className="sr-only">{selectedForm.title}</FieldLegend>
+          <FieldSet className="contents" disabled={isSubmitDisabled}>
+            <FieldLegend className="sr-only">
+              {selectedForm.title}
+            </FieldLegend>
             <div className="flex flex-col gap-6">
               <DynamicFields fields={selectedForm.fields} />
             </div>
             <div className="flex items-center gap-4">
-              <Button disabled={isDisabled} type="submit">
+              <Button disabled={isSubmitDisabled} type="submit">
                 {isPending ? 'Submitting…' : 'Submit form'}
               </Button>
               {isPending && <p role="status">Submitting your form…</p>}
             </div>
           </FieldSet>
           {serverError && (
-            <p className="text-sm text-destructive" role="alert" tabIndex={-1} ref={focusElement}>
+            <p
+              className="text-sm text-destructive"
+              ref={focusElement}
+              role="alert"
+              tabIndex={-1}
+            >
               {serverError}
             </p>
           )}

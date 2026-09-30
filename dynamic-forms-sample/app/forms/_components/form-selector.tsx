@@ -20,7 +20,7 @@ import {
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import type { FormDefinition } from '@/services/universal/form/types'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export type AvailableForm = {
   type: string
@@ -46,8 +46,19 @@ export function FormSelector({
 }: FormSelectorProps) {
   const router = useRouter()
   const [isNavigating, setIsNavigating] = useState(false)
+  const [showLoading, setShowLoading] = useState(false)
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false)
   const [pendingType, setPendingType] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isNavigating) {
+      return
+    }
+
+    const timeout = window.setTimeout(() => setShowLoading(true), 250)
+
+    return () => window.clearTimeout(timeout)
+  }, [isNavigating])
 
   function navigateToType(type: string | null) {
     const params = new URLSearchParams(window.location.search)
@@ -88,19 +99,21 @@ export function FormSelector({
       <section className="flex flex-col gap-4" aria-label="Choose a form">
         <Field>
           <FieldLabel htmlFor="form-type">Form type</FieldLabel>
-          <FieldDescription>Select a form to load its definition.</FieldDescription>
+          <FieldDescription>
+            Select a form to load its definition.
+          </FieldDescription>
           <Combobox
             disabled={isDisabled || isNavigating || !availableForms.length}
-            value={selectedForm?.type ?? null}
-            onValueChange={requestTypeChange}
             itemToStringLabel={(type) => availableForms.find((form) => form.type === type)?.label ?? type}
             itemToStringValue={(type) => type}
+            onValueChange={requestTypeChange}
+            value={selectedForm?.type ?? null}
           >
             <ComboboxInput
-              id="form-type"
-              placeholder={availableForms.length ? 'Choose a form' : 'No forms are available'}
               aria-label="Form type"
               disabled={!availableForms.length || isNavigating || isDisabled}
+              id="form-type"
+              placeholder={availableForms.length ? 'Choose a form' : 'No forms are available'}
               showClear
             />
             <ComboboxContent>
@@ -110,17 +123,38 @@ export function FormSelector({
                     {form.label}
                   </ComboboxItem>
                 ))}
-                <ComboboxEmpty>No matching forms.</ComboboxEmpty>
+                {!availableForms.length && (
+                  <ComboboxEmpty>No matching forms.</ComboboxEmpty>
+                )}
               </ComboboxList>
             </ComboboxContent>
           </Combobox>
         </Field>
-        {selectionMessage && <p role="alert" className="text-sm text-destructive">{selectionMessage}</p>}
-        {!availableForms.length && <p role="status" className="text-sm text-muted-foreground">No forms are available.</p>}
-        {isNavigating && <p role="status" aria-live="polite" className="text-sm text-muted-foreground">Loading form…</p>}
+        {selectionMessage && (
+          <p className="text-sm text-destructive" role="alert">
+            {selectionMessage}
+          </p>
+        )}
+        {!availableForms.length && (
+          <p className="text-sm text-muted-foreground" role="status">
+            No forms are available.
+          </p>
+        )}
+        {showLoading && (
+          <p
+            aria-live="polite"
+            className="text-sm text-muted-foreground"
+            role="status"
+          >
+            Loading form…
+          </p>
+        )}
       </section>
 
-      <Dialog open={isDiscardDialogOpen} onOpenChange={(open) => !open && closeDiscardDialog()}>
+      <Dialog
+        onOpenChange={(open) => !open && closeDiscardDialog()}
+        open={isDiscardDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Discard your answers?</DialogTitle>

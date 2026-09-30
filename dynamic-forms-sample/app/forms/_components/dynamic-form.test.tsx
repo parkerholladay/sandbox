@@ -49,7 +49,7 @@ afterEach(cleanup)
 describe('#DynamicForm', () => {
   it('shows client validation errors without calling the action', async () => {
     const user = userEvent.setup()
-    render(<DynamicForm submitAction={submitAction} selectedForm={absence} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={absence} onDirtyChange={vi.fn()} />)
 
     await user.click(screen.getByRole('button', { name: 'Submit form' }))
 
@@ -61,7 +61,7 @@ describe('#DynamicForm', () => {
 
   it('shows conditional fields, keeps their answers when hidden, and hides them again', async () => {
     const user = userEvent.setup()
-    render(<DynamicForm submitAction={submitAction} selectedForm={absence} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={absence} onDirtyChange={vi.fn()} />)
 
     expect(screen.queryByRole('textbox', { name: /Please describe/ })).not.toBeInTheDocument()
     await user.click(screen.getByRole('radio', { name: 'Other' }))
@@ -78,7 +78,7 @@ describe('#DynamicForm', () => {
 
   it('watches the matching sibling separately inside each repeater entry', async () => {
     const user = userEvent.setup()
-    render(<DynamicForm submitAction={submitAction} selectedForm={contacts} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={contacts} onDirtyChange={vi.fn()} />)
 
     expect(screen.queryByRole('textbox', { name: 'Email address' })).not.toBeInTheDocument()
     await user.click(screen.getByRole('radio', { name: 'Email' }))
@@ -110,7 +110,7 @@ describe('#DynamicForm', () => {
       ],
     }
 
-    render(<DynamicForm submitAction={submitAction} selectedForm={definition} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={definition} onDirtyChange={vi.fn()} />)
 
     expect(screen.getByRole('group', { name: 'All controls' })).toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: 'Text' })).toBeInTheDocument()
@@ -128,7 +128,7 @@ describe('#DynamicForm', () => {
 
   it('initializes a repeater with its minimum entry and respects the minimum when removing', async () => {
     const user = userEvent.setup()
-    render(<DynamicForm submitAction={submitAction} selectedForm={contacts} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={contacts} onDirtyChange={vi.fn()} />)
 
     expect(screen.getAllByRole('textbox', { name: /Contact name/ })).toHaveLength(1)
     expect(screen.queryByRole('button', { name: /Remove Emergency contacts/ })).not.toBeInTheDocument()
@@ -143,7 +143,7 @@ describe('#DynamicForm', () => {
   it('shows a receipt, clears dirty state, and starts another form with its original defaults', async () => {
     const user = userEvent.setup()
     const onDirtyChange = vi.fn()
-    render(<DynamicForm submitAction={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={onDirtyChange} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={onDirtyChange} />)
     await user.type(screen.getByRole('textbox', { name: /Student name/ }), ' Jr.')
 
     await user.click(screen.getByRole('button', { name: 'Submit form' }))
@@ -171,8 +171,7 @@ describe('#DynamicForm', () => {
     const user = userEvent.setup()
     let resolveSubmission!: (result: SubmitFormResult) => void
     submitAction.mockReturnValue(new Promise((resolve) => { resolveSubmission = resolve }))
-    const onSubmittingChange = vi.fn()
-    render(<DynamicForm submitAction={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} onSubmittingChange={onSubmittingChange} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
     const form = screen.getByRole('button', { name: 'Submit form' }).closest('form')!
 
     await user.click(screen.getByRole('button', { name: 'Submit form' }))
@@ -184,12 +183,9 @@ describe('#DynamicForm', () => {
     expect(screen.getByRole('combobox', { name: /Grade/ })).toBeDisabled()
     expect(screen.getByLabelText(/First day absent/)).toBeDisabled()
     expect(submitAction).toHaveBeenCalledTimes(1)
-    expect(onSubmittingChange).toHaveBeenLastCalledWith(true)
-
     await act(async () => resolveSubmission({ status: 'success', receipt }))
 
     expect(screen.getByRole('heading', { name: 'Form submitted' })).toBeInTheDocument()
-    expect(onSubmittingChange).toHaveBeenLastCalledWith(false)
   })
 
   it('maps nested server errors to fields and preserves answers for correction', async () => {
@@ -197,7 +193,7 @@ describe('#DynamicForm', () => {
     submitAction.mockResolvedValueOnce({ status: 'validation_error', message: 'Check your answers.', issues: [
       { path: ['student', 'name'], message: 'Please use the student’s full name.' },
     ] })
-    render(<DynamicForm submitAction={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
 
     await user.click(screen.getByRole('button', { name: 'Submit form' }))
 
@@ -218,7 +214,7 @@ describe('#DynamicForm', () => {
       { path: ['reasonDetails'], message: 'Reload the form to update its fields.' },
       { path: [], message: 'The form definition has changed.' },
     ] })
-    render(<DynamicForm submitAction={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
 
     await user.click(screen.getByRole('button', { name: 'Submit form' }))
 
@@ -233,7 +229,7 @@ describe('#DynamicForm', () => {
       { path: ['contacts'], message: 'Please review your contact list.' },
       { path: ['contacts', 0, 'phone'], message: 'Please use a complete phone number.' },
     ] })
-    render(<DynamicForm submitAction={submitAction} selectedForm={contacts} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={contacts} onDirtyChange={vi.fn()} />)
     await user.type(screen.getByRole('textbox', { name: /Student name/ }), 'Jordan Lee')
     await user.click(screen.getByRole('combobox', { name: /Grade/ }))
     await user.click(await screen.findByRole('option', { name: '4th' }))
@@ -253,7 +249,7 @@ describe('#DynamicForm', () => {
     const user = userEvent.setup()
     let resolveSubmission!: (result: SubmitFormResult) => void
     submitAction.mockReturnValue(new Promise((resolve) => { resolveSubmission = resolve }))
-    render(<DynamicForm submitAction={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
     const form = screen.getByRole('button', { name: 'Submit form' }).closest('form')!
     await user.click(screen.getByLabelText(/First day absent/))
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
@@ -269,7 +265,7 @@ describe('#DynamicForm', () => {
     const user = userEvent.setup()
     const onDirtyChange = vi.fn()
     submitAction.mockRejectedValueOnce(new Error('Network unavailable'))
-    render(<DynamicForm submitAction={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={onDirtyChange} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={onDirtyChange} />)
     await user.type(screen.getByRole('textbox', { name: /Student name/ }), ' Jr.')
 
     await user.click(screen.getByRole('button', { name: 'Submit form' }))
@@ -288,7 +284,7 @@ describe('#DynamicForm', () => {
   it.each(['server_error', 'form_not_found'] as const)('shows a %s result without clearing answers', async (status) => {
     const user = userEvent.setup()
     submitAction.mockResolvedValueOnce({ status, message: 'Please try again later.' })
-    render(<DynamicForm submitAction={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
+    render(<DynamicForm onSubmit={submitAction} selectedForm={getValidAbsenceDefinition()} onDirtyChange={vi.fn()} />)
 
     await user.click(screen.getByRole('button', { name: 'Submit form' }))
 

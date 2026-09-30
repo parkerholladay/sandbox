@@ -6,13 +6,19 @@ import type { SubmitFormInput, SubmitFormResult } from '@/services/universal/for
 
 export const submitFormAction = async (input: SubmitFormInput): Promise<SubmitFormResult> => {
   try {
-    return await createFormSubmission({ database: getDatabaseClient(), input })
+    return await createFormSubmission({
+      database: getDatabaseClient(),
+      input,
+    })
   } catch (error) {
     console.error('Form submission failed', {
       type: typeof input?.type === 'string' ? input.type : undefined,
       errorType: error instanceof Error ? error.name : 'UnknownError',
     })
 
-    return { status: 'server_error', message: 'We could not save your submission. Please try again.' }
+    return {
+      message: 'We could not save your submission. Please try again.',
+      status: 'server_error',
+    }
   }
 }

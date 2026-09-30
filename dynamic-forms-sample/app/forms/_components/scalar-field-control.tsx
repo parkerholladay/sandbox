@@ -165,7 +165,7 @@ const SelectControl = ({
               {option.label}
             </ComboboxItem>
           ))}
-          {field.options.length === 0 && (
+          {!field.options.length && (
             <ComboboxEmpty>No options found.</ComboboxEmpty>
           )}
         </ComboboxList>
@@ -213,7 +213,7 @@ const MultiSelectControl = ({
               {option.label}
             </ComboboxItem>
           ))}
-          {field.options.length === 0 && (
+          {!field.options.length && (
             <ComboboxEmpty>No options found.</ComboboxEmpty>
           )}
         </ComboboxList>

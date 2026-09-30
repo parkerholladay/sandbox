@@ -12,7 +12,9 @@ export default async function FormsPage({ searchParams }: FormsPageProps) {
   const database = getDatabaseClient()
   const [definitions, definition] = await Promise.all([
     listFormDefinitions({ database }),
-    typeof requestedType === 'string' ? getFormDefinition({ database, type: requestedType }) : Promise.resolve(null),
+    typeof requestedType === 'string'
+      ? getFormDefinition({ database, type: requestedType })
+      : Promise.resolve(null),
   ])
 
   let selectionMessage: string | undefined
@@ -29,7 +31,9 @@ export default async function FormsPage({ searchParams }: FormsPageProps) {
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           Family portal
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">School forms</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          School forms
+        </h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
           Choose a form to get started.
         </p>
