@@ -1,7 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import { zodResolver } from '@hookform/resolvers/zod'
-
-import { FORM_DEFINITION_SEEDS } from './seed'
+import { FORM_DEFINITION_SEEDS } from '@/services/internal/seed'
+import { describe, expect, it } from 'vitest'
 import type { FormDefinition } from './types'
 import { getFormSchema, validateFormSubmission } from './validation'
 

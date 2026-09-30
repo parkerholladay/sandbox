@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import type { FormDefinition } from '@/services/forms/types'
+import type { FormDefinition } from '@/services/universal/form/types'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -30,6 +30,7 @@ export type AvailableForm = {
 type FormSelectorProps = {
   availableForms: readonly AvailableForm[]
   isDirty: boolean
+  isDisabled?: boolean
   onNavigatingChange: (isNavigating: boolean) => void
   selectedForm: Pick<FormDefinition, 'type'> | null
   selectionMessage?: string
@@ -38,6 +39,7 @@ type FormSelectorProps = {
 export function FormSelector({
   availableForms,
   isDirty,
+  isDisabled = false,
   onNavigatingChange,
   selectedForm,
   selectionMessage,
@@ -63,7 +65,7 @@ export function FormSelector({
   }
 
   function requestTypeChange(type: string | null) {
-    if (type === (selectedForm?.type ?? null)) {
+    if (isDisabled || isNavigating || type === (selectedForm?.type ?? null)) {
       return
     }
 
@@ -88,6 +90,7 @@ export function FormSelector({
           <FieldLabel htmlFor="form-type">Form type</FieldLabel>
           <FieldDescription>Select a form to load its definition.</FieldDescription>
           <Combobox
+            disabled={isDisabled || isNavigating || !availableForms.length}
             value={selectedForm?.type ?? null}
             onValueChange={requestTypeChange}
             itemToStringLabel={(type) => availableForms.find((form) => form.type === type)?.label ?? type}
@@ -97,7 +100,7 @@ export function FormSelector({
               id="form-type"
               placeholder={availableForms.length ? 'Choose a form' : 'No forms are available'}
               aria-label="Form type"
-              disabled={!availableForms.length || isNavigating}
+              disabled={!availableForms.length || isNavigating || isDisabled}
               showClear
             />
             <ComboboxContent>

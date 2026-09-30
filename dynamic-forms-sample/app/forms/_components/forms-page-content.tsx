@@ -1,7 +1,8 @@
 'use client'
 
-import type { FormDefinition } from '@/services/forms/types'
+import type { FormDefinition } from '@/services/universal/form/types'
 import { useState } from 'react'
+import { submitFormAction } from '@/app/forms/actions'
 import { DynamicForm } from './dynamic-form'
 import { FormSelector, type AvailableForm } from './form-selector'
 
@@ -18,12 +19,14 @@ export function FormsPageContent({
 }: FormsPageContentProps) {
   const [isDirty, setIsDirty] = useState(false)
   const [isNavigating, setIsNavigating] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   return (
     <div className="flex flex-col gap-8">
       <FormSelector
         availableForms={availableForms}
         isDirty={isDirty}
+        isDisabled={isSubmitting}
         onNavigatingChange={setIsNavigating}
         selectedForm={selectedForm ? { type: selectedForm.type } : null}
         selectionMessage={selectionMessage}
@@ -34,6 +37,8 @@ export function FormsPageContent({
           disabled={isNavigating}
           key={selectedForm.type}
           onDirtyChange={setIsDirty}
+          onSubmittingChange={setIsSubmitting}
+          submitAction={submitFormAction}
         />
       )}
     </div>

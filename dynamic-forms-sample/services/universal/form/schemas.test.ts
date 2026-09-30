@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-
 import { FORM_SUBMISSION_SCHEMAS, getFormSubmissionSchema } from './schemas'
 
 describe('#getFormSubmissionSchema', () => {

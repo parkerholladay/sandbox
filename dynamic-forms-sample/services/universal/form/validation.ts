@@ -1,11 +1,14 @@
 import { z } from 'zod'
 
-import { conditionMatches } from './conditions'
 import { getFormSubmissionSchema } from './schemas'
-import type { FormDefinition, FormField } from './types'
+import type { FieldCondition, FormDefinition, FormField } from './types'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+export function isFieldVisible(condition: FieldCondition, value: unknown): boolean {
+  return condition.equals === value
 }
 
 function pruneInactiveFields(
@@ -15,7 +18,7 @@ function pruneInactiveFields(
   const result: Record<string, unknown> = {}
 
   for (const field of fields) {
-    if (field.visibleWhen && !conditionMatches(field.visibleWhen, values[field.visibleWhen.field])) {
+    if (field.visibleWhen && !isFieldVisible(field.visibleWhen, values[field.visibleWhen.field])) {
       continue
     }
 

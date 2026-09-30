@@ -1,5 +1,6 @@
 import { FormsPageContent } from '@/app/forms/_components/forms-page-content'
-import { getFormDefinition, listFormDefinitions } from '@/services/forms/service'
+import { getFormDefinition, listFormDefinitions } from '@/services/server/form'
+import { getDatabaseClient } from '@/services/internal/database'
 
 type FormsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -8,9 +9,10 @@ type FormsPageProps = {
 export default async function FormsPage({ searchParams }: FormsPageProps) {
   const params = await searchParams
   const requestedType = params.type
+  const database = getDatabaseClient()
   const [definitions, definition] = await Promise.all([
-    listFormDefinitions(),
-    typeof requestedType === 'string' ? getFormDefinition(requestedType) : Promise.resolve(null),
+    listFormDefinitions({ database }),
+    typeof requestedType === 'string' ? getFormDefinition({ database, type: requestedType }) : Promise.resolve(null),
   ])
 
   let selectionMessage: string | undefined
@@ -33,7 +35,7 @@ export default async function FormsPage({ searchParams }: FormsPageProps) {
         </p>
       </header>
       <FormsPageContent
-        availableForms={definitions.map(({ type, title }) => ({ type, label: title }))}
+        availableForms={definitions.map(({ title, type }) => ({ label: title, type }))}
         key={typeof requestedType === 'string' ? requestedType : 'no-form'}
         selectedForm={definition}
         selectionMessage={selectionMessage}

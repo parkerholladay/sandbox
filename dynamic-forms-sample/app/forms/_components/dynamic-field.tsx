@@ -2,14 +2,15 @@
 
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel, FieldSet, FieldLegend } from '@/components/ui/field'
-import { conditionMatches } from '@/services/forms/conditions'
+import { isFieldVisible } from '@/services/universal/form/validation'
 import type {
   FieldCondition,
   FormField,
   RepeaterField as RepeaterFieldDefinition,
   ScalarField,
-} from '@/services/forms/types'
-import { useEffect } from 'react'
+} from '@/services/universal/form/types'
+import { useContext, useEffect } from 'react'
+import { FormDisabledContext } from './form-disabled-context'
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 import { ScalarFieldControl } from './scalar-field-control'
 import { getDefinitionDefaults } from './utils'
@@ -56,13 +57,17 @@ const ConditionalField = ({ field, fieldPath, condition }: ConditionalFieldProps
   const parentPath = getParentPath(fieldPath)
   const conditionPath = parentPath ? `${parentPath}.${condition.field}` : condition.field
   const conditionValue = useWatch({ control, name: conditionPath, exact: true })
-  const isVisible = conditionMatches(condition, conditionValue)
+  const isVisible = isFieldVisible(condition, conditionValue)
 
   useEffect(() => {
-    if (!isVisible) clearErrors(fieldPath)
+    if (!isVisible) {
+      clearErrors(fieldPath)
+    }
   }, [clearErrors, fieldPath, isVisible])
 
-  if (!isVisible) return null
+  if (!isVisible) {
+    return null
+  }
 
   return <RenderedField field={field} fieldPath={fieldPath} />
 }
@@ -141,6 +146,7 @@ type RepeaterFieldProps = {
 }
 
 const RepeaterField = ({ field, fieldPath }: RepeaterFieldProps) => {
+  const isDisabled = useContext(FormDisabledContext)
   const { control, formState, getFieldState } = useFormContext<FormValues>()
   const { append, fields, remove } = useFieldArray({ control, name: fieldPath as never })
   const minimumItems = field.minItems ?? 0
@@ -159,7 +165,7 @@ const RepeaterField = ({ field, fieldPath }: RepeaterFieldProps) => {
             </FieldLegend>
             <DynamicFields fields={field.fields} parentPath={`${fieldPath}.${index}`} />
             {fields.length > minimumItems && (
-              <Button type="button" variant="outline" onClick={() => remove(index)}>
+              <Button disabled={isDisabled} type="button" variant="outline" onClick={() => remove(index)}>
                 Remove {field.label.toLowerCase()} {index + 1}
               </Button>
             )}
@@ -167,7 +173,7 @@ const RepeaterField = ({ field, fieldPath }: RepeaterFieldProps) => {
         ))}
       </div>
       {canAddItem && (
-        <Button type="button" variant="outline" onClick={() => append(getDefinitionDefaults({ fields: field.fields }))}>
+        <Button disabled={isDisabled} type="button" variant="outline" onClick={() => append(getDefinitionDefaults({ fields: field.fields }))}>
           Add {field.label.toLowerCase()}
         </Button>
       )}

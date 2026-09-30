@@ -3,7 +3,7 @@
 import { CaretLeftIcon, CaretRightIcon, CaretDownIcon } from '@phosphor-icons/react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from 'cn'
-import { type ComponentProps, useEffect, useRef } from 'react'
+import { type ComponentProps, useEffect, useMemo, useRef } from 'react'
 import {
   DayPicker,
   getDefaultClassNames,
@@ -27,6 +27,48 @@ function Calendar({
   ...props
 }: CalendarProps) {
   const defaultClassNames = getDefaultClassNames()
+  const calendarComponents = useMemo<CalendarProps['components']>(() => ({
+    Root: ({ className, rootRef, ...props }) => {
+      return (
+        <div
+          data-slot="calendar"
+          ref={rootRef}
+          className={cn(className)}
+          {...props}
+        />
+      )
+    },
+    Chevron: ({ className, orientation, ...props }) => {
+      if (orientation === 'left') {
+        return (
+          <CaretLeftIcon className={cn('size-4', className)} {...props} />
+        )
+      }
+
+      if (orientation === 'right') {
+        return (
+          <CaretRightIcon className={cn('size-4', className)} {...props} />
+        )
+      }
+
+      return (
+        <CaretDownIcon className={cn('size-4', className)} {...props} />
+      )
+    },
+    DayButton: ({ ...props }) => (
+      <CalendarDayButton locale={locale} {...props} />
+    ),
+    WeekNumber: ({ children, ...props }) => {
+      return (
+        <td {...props}>
+          <div className="flex size-(--cell-size) items-center justify-center text-center">
+            {children}
+          </div>
+        </td>
+      )
+    },
+    ...components,
+  }), [components, locale])
 
   return (
     <DayPicker
@@ -134,48 +176,7 @@ function Calendar({
         hidden: cn('invisible', defaultClassNames.hidden),
         ...classNames,
       }}
-      components={{
-        Root: ({ className, rootRef, ...props }) => {
-          return (
-            <div
-              data-slot="calendar"
-              ref={rootRef}
-              className={cn(className)}
-              {...props}
-            />
-          )
-        },
-        Chevron: ({ className, orientation, ...props }) => {
-          if (orientation === 'left') {
-            return (
-              <CaretLeftIcon className={cn('size-4', className)} {...props} />
-            )
-          }
-
-          if (orientation === 'right') {
-            return (
-              <CaretRightIcon className={cn('size-4', className)} {...props} />
-            )
-          }
-
-          return (
-            <CaretDownIcon className={cn('size-4', className)} {...props} />
-          )
-        },
-        DayButton: ({ ...props }) => (
-          <CalendarDayButton locale={locale} {...props} />
-        ),
-        WeekNumber: ({ children, ...props }) => {
-          return (
-            <td {...props}>
-              <div className="flex size-(--cell-size) items-center justify-center text-center">
-                {children}
-              </div>
-            </td>
-          )
-        },
-        ...components,
-      }}
+      components={calendarComponents}
       {...props}
     />
   )
@@ -201,6 +202,7 @@ function CalendarDayButton({
 
   return (
     <Button
+      ref={ref}
       variant="ghost"
       size="icon"
       data-day={day.date.toLocaleDateString(locale?.code)}

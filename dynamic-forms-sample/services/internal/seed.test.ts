@@ -1,9 +1,8 @@
+import { GRADE_LEVELS } from '@/services/universal/grade-levels'
+import { FORM_SUBMISSION_SCHEMAS } from '@/services/universal/form/schemas'
+import type { FieldCondition, FormField } from '@/services/universal/form/types'
 import { describe, expect, it } from 'vitest'
-
-import { FORM_SUBMISSION_SCHEMAS } from './schemas'
 import { FORM_DEFINITION_SEEDS } from './seed'
-import { GRADE_LEVELS } from './grade-options'
-import type { FieldCondition, FormField } from './types'
 
 function expectUniqueNamesAndValidConditions(fields: readonly FormField[]) {
   const names = fields.map((field) => field.name)

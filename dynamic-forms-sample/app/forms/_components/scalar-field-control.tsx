@@ -30,9 +30,10 @@ import type {
   SwitchField,
   TextareaField,
   TextField,
-} from '@/services/forms/types'
+} from '@/services/universal/form/types'
 import { format, parseISO } from 'date-fns'
-import { useState, type Ref } from 'react'
+import { useContext, useState, type Ref } from 'react'
+import { FormDisabledContext } from './form-disabled-context'
 
 type FieldControlProps<Field extends ScalarField> = {
   describedBy?: string
@@ -40,6 +41,7 @@ type FieldControlProps<Field extends ScalarField> = {
   id: string
   inputRef?: Ref<HTMLElement>
   isInvalid: boolean
+  isDisabled: boolean
   onBlur: () => void
   onChange: (value: unknown) => void
   value: unknown
@@ -51,6 +53,7 @@ const TextControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
@@ -59,6 +62,7 @@ const TextControl = ({
 
   return (
     <Input
+      disabled={isDisabled}
       aria-describedby={describedBy}
       aria-invalid={isInvalid}
       aria-required={field.required}
@@ -79,11 +83,13 @@ const TextareaControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
 }: FieldControlProps<TextareaField>) => (
   <Textarea
+    disabled={isDisabled}
     aria-describedby={describedBy}
     aria-invalid={isInvalid}
     aria-required={field.required}
@@ -102,11 +108,13 @@ const NumberControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
 }: FieldControlProps<NumberField>) => (
   <Input
+    disabled={isDisabled}
     aria-describedby={describedBy}
     aria-invalid={isInvalid}
     aria-required={field.required}
@@ -125,6 +133,7 @@ const SelectControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
@@ -133,6 +142,7 @@ const SelectControl = ({
 
   return (
     <Combobox
+      disabled={isDisabled}
       itemToStringLabel={(optionValue) => labels.get(optionValue) ?? optionValue}
       itemToStringValue={(optionValue) => optionValue}
       onValueChange={onChange}
@@ -170,6 +180,7 @@ const MultiSelectControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
@@ -178,6 +189,7 @@ const MultiSelectControl = ({
 
   return (
     <Combobox
+      disabled={isDisabled}
       itemToStringLabel={(optionValue) => labels.get(optionValue) ?? optionValue}
       itemToStringValue={(optionValue) => optionValue}
       multiple
@@ -216,11 +228,13 @@ const RadioControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
 }: FieldControlProps<RadioField>) => (
   <RadioGroup
+    disabled={isDisabled}
     aria-describedby={describedBy}
     aria-invalid={isInvalid}
     aria-label={field.label}
@@ -250,12 +264,14 @@ const CheckboxControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
 }: FieldControlProps<CheckboxField>) => (
   <div className="flex items-center gap-2">
     <Checkbox
+      disabled={isDisabled}
       aria-describedby={describedBy}
       aria-invalid={isInvalid}
       aria-required={field.required}
@@ -275,12 +291,14 @@ const SwitchControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
 }: FieldControlProps<SwitchField>) => (
   <div className="flex items-center gap-2">
     <Switch
+      disabled={isDisabled}
       aria-describedby={describedBy}
       aria-invalid={isInvalid}
       aria-required={field.required}
@@ -300,6 +318,7 @@ const DateControl = ({
   id,
   inputRef,
   isInvalid,
+  isDisabled,
   onBlur,
   onChange,
   value,
@@ -311,20 +330,17 @@ const DateControl = ({
     : 'Choose a date'
 
   return (
-    <Popover onOpenChange={setIsOpen} open={isOpen}>
+    <Popover onOpenChange={setIsOpen} open={isOpen && !isDisabled}>
       <PopoverTrigger
+        aria-describedby={describedBy}
+        aria-invalid={isInvalid}
+        aria-required={field.required}
         className="w-full justify-start font-normal"
+        disabled={isDisabled}
+        id={id}
         onBlur={onBlur}
-        render={(
-          <Button
-            aria-describedby={describedBy}
-            aria-invalid={isInvalid}
-            aria-required={field.required}
-            id={id}
-            ref={inputRef as Ref<HTMLButtonElement>}
-            variant="outline"
-          />
-        )}
+        ref={inputRef as Ref<HTMLButtonElement>}
+        render={<Button variant="outline" />}
       >
         {displayValue}
       </PopoverTrigger>
@@ -333,6 +349,7 @@ const DateControl = ({
           autoFocus
           mode="single"
           onSelect={(date) => {
+            if (isDisabled) return
             onChange(date ? format(date, 'yyyy-MM-dd') : '')
             if (date) setIsOpen(false)
           }}
@@ -347,7 +364,10 @@ function assertNever(field: never): never {
   throw new Error(`Unsupported form field type: ${JSON.stringify(field)}`)
 }
 
-export const ScalarFieldControl = ({ field, ...controlProps }: FieldControlProps<ScalarField>) => {
+export const ScalarFieldControl = ({ field, ...props }: Omit<FieldControlProps<ScalarField>, 'isDisabled'>) => {
+  const isDisabled = useContext(FormDisabledContext)
+  const controlProps = { ...props, isDisabled }
+
   switch (field.type) {
     case 'text':
     case 'email':

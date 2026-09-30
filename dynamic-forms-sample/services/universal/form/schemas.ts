@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { GRADE_VALUES } from './grade-options'
+import { GRADE_VALUES } from '../grade-levels'
 
 const requiredText = z.string().trim().min(1, 'This field is required.')
 const email = z.email('Enter a valid email address.')

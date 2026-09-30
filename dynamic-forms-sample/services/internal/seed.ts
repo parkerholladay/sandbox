@@ -1,5 +1,5 @@
-import type { ChoiceOption, FormDefinition } from './types'
-import { GRADE_LEVELS } from './grade-options'
+import type { ChoiceOption, FormDefinition } from '@/services/universal/form/types'
+import { GRADE_LEVELS } from '@/services/universal/grade-levels'
 
 const absenceReasons = [
   { label: 'Illness', value: 'illness' },

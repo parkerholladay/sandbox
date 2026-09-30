@@ -9,20 +9,20 @@ export type JsonValue =
 export type ConditionValue = string | number | boolean;
 
 export type FieldCondition = {
-  field: string;
   equals: ConditionValue;
+  field: string;
 }
 
 type BaseField = {
-  name: string;
-  label: string;
   description?: string;
+  label: string;
+  name: string;
   visibleWhen?: FieldCondition;
 }
 
 type TextFieldProperties = {
-  placeholder?: string;
   defaultValue?: string;
+  placeholder?: string;
   required?: boolean;
 }
 
@@ -43,20 +43,20 @@ export type PhoneField = BaseField & TextFieldProperties & {
 }
 
 export type NumberField = BaseField & {
-  type: 'number';
   defaultValue?: number;
   required?: boolean;
+  type: 'number';
 }
 
 export type DateField = BaseField & {
-  type: 'date';
   defaultValue?: string;
   required?: boolean;
+  type: 'date';
 }
 
 type ChoiceFieldProperties = {
-  options: readonly ChoiceOption[];
   defaultValue?: string;
+  options: readonly ChoiceOption[];
   required?: boolean;
 }
 
@@ -69,10 +69,10 @@ export type RadioField = BaseField & ChoiceFieldProperties & {
 }
 
 export type MultiSelectField = BaseField & {
-  type: 'multi-select';
-  options: readonly ChoiceOption[];
   defaultValue?: string[];
+  options: readonly ChoiceOption[];
   required?: boolean;
+  type: 'multi-select';
 }
 
 type BooleanFieldProperties = {
@@ -89,15 +89,15 @@ export type SwitchField = BaseField & BooleanFieldProperties & {
 }
 
 export type GroupField = BaseField & {
-  type: 'group';
   fields: readonly FormField[];
+  type: 'group';
 }
 
 export type RepeaterField = BaseField & {
-  type: 'repeater';
   fields: readonly FormField[];
-  minItems?: number;
   maxItems?: number;
+  minItems?: number;
+  type: 'repeater';
 }
 
 export type FormField =
@@ -124,8 +124,31 @@ export type ChoiceOption = {
 }
 
 export type FormDefinition = {
-  type: string;
-  title: string;
   description?: string;
   fields: readonly FormField[];
+  title: string;
+  type: string;
 }
+
+export type SubmissionReceipt = {
+  id: string
+  submittedAt: string
+  type: string
+}
+
+export type SubmitFormInput = {
+  type: string
+  values: unknown
+}
+
+export type SubmissionIssue = {
+  message: string
+  path: (string | number)[]
+}
+
+export type SubmitFormResult =
+  | { receipt: SubmissionReceipt; status: 'success' }
+  | { issues: SubmissionIssue[]; message: string; status: 'validation_error' }
+  | { message: string; status: 'form_not_found' | 'server_error' }
+
+export type SubmitFormAction = (input: SubmitFormInput) => Promise<SubmitFormResult>

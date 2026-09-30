@@ -1,5 +1,3 @@
-import type { ChoiceOption } from './types'
-
 export const GRADE_LEVELS = [
   { label: 'Kindergarten', value: 'K' },
   ...Array.from({ length: 12 }, (_, index) => {
@@ -14,6 +12,6 @@ export const GRADE_LEVELS = [
 
     return { label, value: `${grade}` }
   }),
-] as const satisfies readonly ChoiceOption[]
+] as const satisfies readonly { label: string; value: string }[]
 
 export const GRADE_VALUES = GRADE_LEVELS.map((grade) => grade.value) as [string, ...string[]]
