@@ -6,9 +6,14 @@ export default defineConfig({
   resolve: {
     alias: {
       'server-only': fileURLToPath(new URL('./tests/server-only.ts', import.meta.url)),
+      '@': fileURLToPath(new URL('.', import.meta.url)),
     },
   },
   test: {
-    include: ['services/forms/**/*.test.ts'],
+    include: [
+      'app/**/*.test.ts',
+      'app/**/*.test.tsx',
+      'services/**/*.test.ts',
+    ],
   },
 })
